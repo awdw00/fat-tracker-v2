@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>減肥，食飯</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9fafb;
+      margin: 0;
+      padding: 2rem;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+    label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+    select, input {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    button {
+      margin-top: 1.5rem;
+      padding: 0.75rem 1.5rem;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background: #1e40af;
+    }
+    table {
+      width: 100%;
+      margin-top: 1.5rem;
+      border-collapse: collapse;
+      display: none;
+    }
+    th, td {
+      padding: 0.6rem;
+      border-bottom: 1px solid #ccc;
+      text-align: center;
+    }
+    th {
+      background: #f1f5f9;
+    }
+    .results {
+      margin-top: 2rem;
+    }
+    .user-section {
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>減肥，食飯</h1>
+
+    <form id="progressForm">
+      <label for="user">用戶名稱 (User)</label>
+      <select id="user" required>
+        <option value="">請選擇</option>
+        <option value="JJ">JJ</option>
+        <option value="Ivy">Ivy</option>
+        <option value="Angus">Angus</option>
+      </select>
+
+      <label for="date">日期 (Date)</label>
+      <input type="date" id="date" required />
+
+      <label for="weight">體重 Body Weight (kg)</label>
+      <input type="number" id="weight" step="0.1" required />
+
+      <label for="bodyFat">體脂率 Body Fat %</label>
+      <input type="number" id="bodyFat" step="0.1" required />
+
+      <label for="muscleMass">骨骼肌量 Skeletal Muscle Mass (kg)</label>
+      <input type="number" id="muscleMass" step="0.1" required />
+
+      <button type="submit">新增紀錄 (Add Entry)</button>
+    </form>
+
+    <div class="results">
+      <div class="user-section" id="section-JJ">
+        <h2>JJ 的進度紀錄</h2>
+        <table id="table-JJ">
+          <thead>
+            <tr>
+              <th>日期</th>
+              <th>體重 (kg)</th>
+              <th>體脂 (%)</th>
+              <th>肌肉量 (kg)</th>
+              <th>% 變化 (上次)</th>
+              <th>% 變化 (首次)</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="user-section" id="section-Ivy">
+        <h2>Ivy 的進度紀錄</h2>
+        <table id="table-Ivy">
+          <thead>
+            <tr>
+              <th>日期</th>
+              <th>體重 (kg)</th>
+              <th>體脂 (%)</th>
+              <th>肌肉量 (kg)</th>
+              <th>% 變化 (上次)</th>
+              <th>% 變化 (首次)</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="user-section" id="section-Angus">
+        <h2>Angus 的進度紀錄</h2>
+        <table id="table-Angus">
+          <thead>
+            <tr>
+              <th>日期</th>
+              <th>體重 (kg)</th>
+              <th>體脂 (%)</th>
+              <th>肌肉量 (kg)</th>
+              <th>% 變化 (上次)</th>
+              <th>% 變化 (首次)</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('progressForm');
+
+    // Load from localStorage or initialize
+    const userData = JSON.parse(localStorage.getItem('userData')) || {
+      JJ: [],
+      Ivy: [],
+      Angus: []
+    };
+
+    function saveData() {
+      localStorage.setItem('userData', JSON.stringify(userData));
+    }
+
+    function renderUserTable(user) {
+      const table = document.querySelector(`#table-${user}`);
+      const tbody = table.querySelector('tbody');
+      tbody.innerHTML = ''; // clear table
+
+      const entries = userData[user];
+
+      if (entries.length === 0) return;
+
+      entries.forEach((entry, i) => {
+        let changeLast = '–';
+        let changeFirst = '–';
+
+        if (i > 0) {
+          const last = entries[i - 1];
+          changeLast = `
+            體重: ${(100 * (entry.weight - last.weight) / last.weight).toFixed(1)}%<br>
+            體脂: ${(100 * (entry.bodyFat - last.bodyFat) / last.bodyFat).toFixed(1)}%<br>
+            肌肉: ${(100 * (entry.muscleMass - last.muscleMass) / last.muscleMass).toFixed(1)}%
+          `;
+        }
+        if (i >= 0) {
+          const first = entries[0];
+          changeFirst = `
+            體重: ${(100 * (entry.weight - first.weight) / first.weight).toFixed(1)}%<br>
+            體脂: ${(100 * (entry.bodyFat - first.bodyFat) / first.bodyFat).toFixed(1)}%<br>
+            肌肉: ${(100 * (entry.muscleMass - first.muscleMass) / first.muscleMass).toFixed(1)}%
+          `;
+        }
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${entry.date}</td>
+          <td>${entry.weight}</td>
+          <td>${entry.bodyFat}</td>
+          <td>${entry.muscleMass}</td>
+          <td>${changeLast}</td>
+          <td>${changeFirst}</td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      table.style.display = 'table';
+    }
+
+    // Render all users on page load
+    ['JJ', 'Ivy', 'Angus'].forEach(renderUserTable);
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const user = document.getElementById('user').value;
+      const date = document.getElementById('date').value;
+      const weight = parseFloat(document.getElementById('weight').value);
+      const bodyFat = parseFloat(document.getElementById('bodyFat').value);
+      const muscleMass = parseFloat(document.getElementById('muscleMass').value);
+
+      // Store
+      userData[user].push({ date, weight, bodyFat, muscleMass });
+      saveData();
+      renderUserTable(user);
+      form.reset();
+    });
+  </script>
+</body>
+</html>
